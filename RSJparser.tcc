@@ -60,6 +60,14 @@ namespace jsonlib {
     }
     enum StrTrimDir { STRTRIM_L=1, STRTRIM_R=2, STRTRIM_LR=3 };
     inline
+    std::string toLower(const std::string &text) {
+        std::string result = "";
+        for (size_t ix = 0; ix < text.length(); ++ix) {
+            result += tolower(text[ix]);
+        }
+        return result;
+    }
+    inline
     bool is_number(const std::string &num) {
         if(num.empty()) {
             return false;
@@ -86,14 +94,16 @@ namespace jsonlib {
         if (token.size() < 4) {
             return false;
         }
-        return token == "true" || token == "false";
+        std::string tken = toLower(token);
+        return tken == "true" || tken == "false";
     }
     inline
     bool is_null(const std::string &token) {
         if (token.size() < 4) {
             return false;
         }
-        return token == "null";
+        std::string tken = toLower(token);
+        return tken == "null";
     }
     inline std::string strtrim (std::string str, std::string chars=" \t\n\r", int max_count=-1, StrTrimDir dirs=STRTRIM_LR) {
         if (str.empty()) return(str);
@@ -492,6 +502,9 @@ namespace jsonlib {
                         if(!is_number(data) && !is_boolean(data) && !is_null(data)) {
                             data = "\""+data+"\"";
                         }
+                    }
+                    if (is_boolean(data) || is_null(data)) {
+                        data = toLower(data);
                     }
                     if (data[0] == '\'' && data[data.length() - 1] == '\'') {
                         data = data.substr(1,data.length() -2);
