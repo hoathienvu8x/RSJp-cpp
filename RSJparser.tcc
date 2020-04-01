@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <regex>
 #include <vector>
 #include <unordered_map>
 #include <utility>
@@ -61,8 +60,26 @@ namespace jsonlib {
     }
     enum StrTrimDir { STRTRIM_L=1, STRTRIM_R=2, STRTRIM_LR=3 };
     inline
-    bool is_number(const std::string &token) {
-        return std::regex_match(token, std::regex("(\\+|-)?[0-9]*(\\.?([0-9]+))$"));
+    bool is_number(const std::string &num) {
+        if(num.empty()) {
+            return false;
+        }
+        std::string::size_type pos = 0;
+        if (num[pos] == '-' || num[pos] == '+') ++pos;
+        bool dot = false;
+        for(; pos < num.size(); ++pos) {
+            if(num[pos] == '.') {
+                if (dot == true) {
+                    return false;
+                }
+                dot = true;
+            } else {
+                if (!std::isdigit(num[pos])) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     inline
     bool is_boolean(const std::string &token) {
