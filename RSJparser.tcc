@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <regex>
 #include <vector>
 #include <unordered_map>
 #include <utility>
@@ -59,6 +60,24 @@ namespace jsonlib {
         return("RSJ_UNKNOWN");
     }
     enum StrTrimDir { STRTRIM_L=1, STRTRIM_R=2, STRTRIM_LR=3 };
+    inline
+    bool is_number(const std::string &token) {
+        return std::regex_match(token, std::regex("(\\+|-)?[0-9]*(\\.?([0-9]+))$"));
+    }
+    inline
+    bool is_boolean(const std::string &token) {
+        if (token.size() < 4) {
+            return false;
+        }
+        return token == "true" || token == "false";
+    }
+    inline
+    bool is_null(const std::string &token) {
+        if (token.size() < 4) {
+            return false;
+        }
+        return token == "null";
+    }
     inline std::string strtrim (std::string str, std::string chars=" \t\n\r", int max_count=-1, StrTrimDir dirs=STRTRIM_LR) {
         if (str.empty()) return(str);
         if (max_count<0) max_count = str.length();
@@ -452,6 +471,11 @@ namespace jsonlib {
             else // RSJ_LEAF or RSJ_UNKNOWN
             {
                 if(parsed_data_p->type==JSON_LEAF) {
+                    if (data[0] != '\'' && data[0] != '"') {
+                        if(!is_number(data) && !is_boolean(data) && !is_null(data)) {
+                            data = "\""+data+"\"";
+                        }
+                    }
                     if (data[0] == '\'' && data[data.length() - 1] == '\'') {
                         data = data.substr(1,data.length() -2);
                         std::string tmp = "";
